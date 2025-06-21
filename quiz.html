@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Flutter & Dart - Prova 2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #02aab0 0%, #00cdac 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .quiz-content {
+            padding: 40px;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-right: 15px;
+            display: inline-block;
+        }
+
+        .options {
+            display: grid;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+
+        .option.selected {
+            border-color: #02aab0;
+            background: linear-gradient(135deg, #02aab0 0%, #00cdac 100%);
+            color: white;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+        }
+
+        .option input[type="radio"] {
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e9ecef;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #02aab0 0%, #00cdac 100%);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .result-container {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .result-container h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .score {
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #02aab0 0%, #00cdac 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .score-text {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #02aab0 0%, #00cdac 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(2, 170, 176, 0.4);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .quiz-content {
+                padding: 20px;
+            }
+
+            .question {
+                font-size: 1.1rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Quiz Flutter & Dart</h1>
+            <p>Questões para estudo da Prova 2</p>
+        </div>
+
+        <div id="quiz-container" class="quiz-content">
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <div id="progress-text" class="progress-text"></div>
+
+            <div id="question-container" class="question-container">
+                <div id="question" class="question"></div>
+                <div id="options" class="options"></div>
+            </div>
+
+            <div class="controls">
+                <button id="prev-btn" class="btn" onclick="previousQuestion()">← Anterior</button>
+                <button id="check-btn" class="btn" onclick="checkAnswer()">Verificar Resposta</button>
+                <button id="next-btn" class="btn" onclick="nextQuestion()">Próxima →</button>
+                <button id="finish-btn" class="btn hidden" onclick="finishQuiz()">Finalizar Quiz</button>
+                <button id="reset-btn" class="btn hidden" onclick="resetAnswers()"
+                    style="background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);">🔄 Refazer Respostas</button>
+            </div>
+        </div>
+
+        <div id="result-container" class="result-container hidden">
+            <h2>Quiz Finalizado!</h2>
+            <div id="score" class="score"></div>
+            <div id="score-text" class="score-text"></div>
+            <button class="restart-btn" onclick="restartQuiz()">Refazer Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Qual widget é usado para entrada de texto simples em Flutter?",
+                options: ["Checkbox", "TextField", "Radio", "DropdownButton"],
+                correct: 1
+            },
+            {
+                question: "O que o widget TextFormField oferece a mais em relação ao TextField?",
+                options: ["Suporte a validação e integração com formulários", "Rolagem automática", "Seleção de múltiplas opções", "Exibição de datas"],
+                correct: 0
+            },
+            {
+                question: "Qual widget é ideal para selecionar uma opção entre várias em um grupo?",
+                options: ["Checkbox", "Radio", "TextField", "DatePicker"],
+                correct: 1
+            },
+            {
+                question: "O widget Checkbox é usado para:",
+                options: ["Seleção de uma única opção", "Entrada de texto longo", "Seleção de múltiplas opções", "Exibição de uma lista suspensa"],
+                correct: 2
+            },
+            {
+                question: "Qual propriedade do DropdownButton define as opções exibidas?",
+                options: ["items", "value", "onChanged", "hint"],
+                correct: 0
+            },
+            {
+                question: "O widget DatePicker é usado para:",
+                options: ["Selecionar uma data em um calendário", "Inserir texto formatado", "Exibir uma lista rolável", "Selecionar múltiplas opções"],
+                correct: 0
+            },
+            {
+                question: "Qual widget permite rolagem de conteúdo em uma única direção?",
+                options: ["Row", "Column", "SingleChildScrollView", "TextFormField"],
+                correct: 2
+            },
+            {
+                question: "O widget ListView é mais adequado para:",
+                options: ["Exibir widgets em linha horizontal", "Exibir uma lista rolável de itens", "Organizar widgets em coluna", "Entrada de dados de texto"],
+                correct: 1
+            },
+            {
+                question: "Qual widget organiza seus filhos em uma linha horizontal?",
+                options: ["Column", "Row", "ListView", "SingleChildScrollView"],
+                correct: 1
+            },
+            {
+                question: "O widget Column é usado para:",
+                options: ["Exibir itens em uma lista rolável", "Organizar widgets verticalmente", "Permitir entrada de texto", "Selecionar datas"],
+                correct: 1
+            },
+            {
+                question: "Em Dart, qual biblioteca é comumente usada para serialização e deserialização de arquivos?",
+                options: ["dart:async", "dart:io", "dart:convert", "dart:math"],
+                correct: 2
+            },
+            {
+                question: "Qual função é usada para converter uma string JSON em um objeto Dart?",
+                options: ["jsonEncode", "jsonDecode", "toString", "parseJson"],
+                correct: 1
+            },
+            {
+                question: "O que a função jsonEncode faz?",
+                options: ["Converte um objeto Dart em uma string JSON", "Lê um arquivo de texto", "Converte uma string em um inteiro", "Executa operações assíncronas"],
+                correct: 0
+            },
+            {
+                question: "Qual palavra-chave em Dart indica que uma função é assíncrona?",
+                options: ["sync", "async", "await", "future"],
+                correct: 1
+            },
+            {
+                question: "Para que serve a palavra-chave await em Dart?",
+                options: ["Definir uma função síncrona", "Aguardar a conclusão de uma operação assíncrona", "Criar uma lista de itens", "Serializar dados"],
+                correct: 1
+            },
+            {
+                question: "Qual biblioteca é usada para fazer requisições HTTP em Flutter?",
+                options: ["dart:io", "http", "dart:async", "shared_preferences"],
+                correct: 1
+            },
+            {
+                question: "Qual método da biblioteca http é usado para obter dados de um servidor?",
+                options: ["post", "get", "put", "delete"],
+                correct: 1
+            },
+            {
+                question: "O método http.post é usado para:",
+                options: ["Excluir dados de um servidor", "Atualizar dados existentes", "Enviar dados para um servidor", "Obter dados de um servidor"],
+                correct: 2
+            },
+            {
+                question: "Qual método HTTP é usado para atualizar recursos existentes?",
+                options: ["get", "post", "put", "delete"],
+                correct: 2
+            },
+            {
+                question: "O que o método http.delete faz?",
+                options: ["Envia dados para o servidor", "Remove um recurso do servidor", "Obtém dados do servidor", "Atualiza um recurso existente"],
+                correct: 1
+            },
+            {
+                question: "Qual widget é usado para construir a interface com base no estado de um Future?",
+                options: ["ListView", "FutureBuilder", "TextField", "DropdownButton"],
+                correct: 1
+            },
+            {
+                question: "Qual propriedade do FutureBuilder define a operação assíncrona a ser monitorada?",
+                options: ["builder", "future", "initialData", "snapshot"],
+                correct: 1
+            },
+            {
+                question: "O que a propriedade builder do FutureBuilder faz?",
+                options: ["Define o Future a ser executado", "Constrói a interface com base no estado do Future", "Armazena dados iniciais", "Serializa dados JSON"],
+                correct: 1
+            },
+            {
+                question: "Qual biblioteca é usada para persistência de dados simples em Flutter?",
+                options: ["dart:io", "http", "shared_preferences", "dart:convert"],
+                correct: 2
+            },
+            {
+                question: "Como você obtém uma instância de SharedPreferences?",
+                options: ["SharedPreferences.getInstance()", "SharedPreferences.create()", "SharedPreferences.init()", "SharedPreferences.load()"],
+                correct: 0
+            },
+            {
+                question: "Qual método do SharedPreferences é usado para salvar um valor booleano?",
+                options: ["setString", "setInt", "setBool", "setDouble"],
+                correct: 2
+            },
+            {
+                question: "Qual widget é mais adequado para formulários com validação?",
+                options: ["TextField", "TextFormField", "Checkbox", "Radio"],
+                correct: 1
+            },
+            {
+                question: "Qual propriedade do TextField define o tipo de teclado exibido?",
+                options: ["controller", "keyboardType", "onChanged", "decoration"],
+                correct: 1
+            },
+            {
+                question: "O widget Radio requer qual propriedade para agrupar opções?",
+                options: ["groupValue", "value", "onChanged", "items"],
+                correct: 0
+            },
+            {
+                question: "Qual propriedade do DropdownButton é chamada quando uma opção é selecionada?",
+                options: ["value", "items", "onChanged", "hint"],
+                correct: 2
+            },
+            {
+                question: "O widget DatePicker é geralmente apresentado usando:",
+                options: ["showDialog", "showDatePicker", "showModalBottomSheet", "Navigator.push"],
+                correct: 1
+            },
+            {
+                question: "Qual widget evita o overflow de conteúdo em uma tela?",
+                options: ["Row", "Column", "SingleChildScrollView", "ListView"],
+                correct: 2
+            },
+            {
+                question: "Qual propriedade do ListView define a direção de rolagem?",
+                options: ["scrollDirection", "itemCount", "children", "padding"],
+                correct: 0
+            },
+            {
+                question: "O widget Row pode ser combinado com qual widget para evitar overflow?",
+                options: ["Column", "SingleChildScrollView", "TextField", "Checkbox"],
+                correct: 1
+            },
+            {
+                question: "Qual propriedade do Column controla o alinhamento horizontal dos filhos?",
+                options: ["mainAxisAlignment", "crossAxisAlignment", "children", "scrollDirection"],
+                correct: 1
+            },
+            {
+                question: "Qual biblioteca em Dart contém jsonDecode e jsonEncode?",
+                options: ["dart:io", "dart:async", "dart:convert", "dart:math"],
+                correct: 2
+            },
+            {
+                question: "Qual tipo de dado é retornado por jsonDecode?",
+                options: ["String", "Map ou List", "int", "double"],
+                correct: 1
+            },
+            {
+                question: "Em operações assíncronas, o que Future representa?",
+                options: ["Um valor disponível imediatamente", "Um valor que estará disponível no futuro", "Uma lista de widgets", "Um arquivo serializado"],
+                correct: 1
+            },
+            {
+                question: "Qual palavra-chave é usada para esperar o resultado de um Future?",
+                options: ["async", "await", "then", "sync"],
+                correct: 1
+            },
+            {
+                question: "Qual método da biblioteca http é usado para enviar dados atualizados ao servidor?",
+                options: ["get", "post", "put", "delete"],
+                correct: 2
+            },
+            {
+                question: "Qual propriedade do FutureBuilder fornece o estado atual do Future?",
+                options: ["builder", "future", "snapshot", "initialData"],
+                correct: 2
+            },
+            {
+                question: "O que snapshot.hasData indica no FutureBuilder?",
+                options: ["Se o Future foi concluído com erro", "Se o Future está em execução", "Se o Future retornou dados com sucesso", "Se o Future foi cancelado"],
+                correct: 2
+            },
+            {
+                question: "Qual método do SharedPreferences recupera um valor de string?",
+                options: ["getInt", "getString", "getBool", "getDouble"],
+                correct: 1
+            },
+            {
+                question: "Qual propriedade do TextFormField é usada para validação?",
+                options: ["validator", "controller", "onChanged", "keyboardType"],
+                correct: 0
+            },
+            {
+                question: "Qual widget é mais eficiente para listas longas em Flutter?",
+                options: ["Row", "Column", "ListView.builder", "SingleChildScrollView"],
+                correct: 2
+            },
+            {
+                question: "Qual método do SharedPreferences remove uma chave?",
+                options: ["remove", "clear", "delete", "setString"],
+                correct: 0
+            },
+            {
+                question: "O que acontece se você usar jsonEncode em um objeto sem suporte?",
+                options: ["Retorna uma string vazia", "Lança uma exceção", "Converte para null", "Ignora o objeto"],
+                correct: 1
+            },
+            {
+                question: "Qual propriedade do http.get define cabeçalhos da requisição?",
+                options: ["headers", "body", "url", "encoding"],
+                correct: 0
+            },
+            {
+                question: "Qual método do SharedPreferences limpa todos os dados salvos?",
+                options: ["remove", "clear", "deleteAll", "reset"],
+                correct: 1
+            },
+            {
+                question: "Qual é o propósito principal do FutureBuilder?",
+                options: ["Exibir uma lista rolável", "Construir a UI com base no estado de um Future", "Serializar dados JSON", "Armazenar dados localmente"],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let quizFinished = false;
+        let shuffledQuestions = [];
+        let questionsVerified = []; // Array para rastrear quais questões foram verificadas
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function shuffleOptions(question) {
+            const correctAnswer = question.options[question.correct];
+            const shuffledOptions = shuffleArray(question.options);
+            const newCorrectIndex = shuffledOptions.indexOf(correctAnswer);
+
+            return {
+                ...question,
+                options: shuffledOptions,
+                correct: newCorrectIndex
+            };
+        }
+
+        function initializeQuiz() {
+            // Embaralhar perguntas
+            shuffledQuestions = shuffleArray(questions).map(shuffleOptions);
+            currentQuestion = 0;
+            userAnswers = new Array(shuffledQuestions.length).fill(null);
+            questionsVerified = new Array(shuffledQuestions.length).fill(false);
+            quizFinished = false;
+            showQuestion();
+            updateProgress();
+            updateButtons();
+        }
+
+        function showQuestion() {
+            const question = shuffledQuestions[currentQuestion];
+            const isVerified = questionsVerified[currentQuestion];
+
+            document.getElementById('question').innerHTML = `
+                <span class="question-number">Questão ${currentQuestion + 1}</span>
+                ${question.question}
+            `;
+
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.innerHTML = `
+                    <input type="radio" name="question${currentQuestion}" value="${index}" id="option${index}">
+                    <label for="option${index}">${option}</label>
+                `;
+
+                // Se a questão não foi verificada, permite seleção
+                if (!isVerified) {
+                    optionElement.addEventListener('click', () => selectOption(index));
+                }
+
+                // Marcar resposta selecionada
+                if (userAnswers[currentQuestion] === index) {
+                    optionElement.classList.add('selected');
+                }
+
+                // Se já foi verificada, mostrar feedback visual
+                if (isVerified) {
+                    if (index === question.correct) {
+                        optionElement.classList.add('correct');
+                    } else if (index === userAnswers[currentQuestion] && index !== question.correct) {
+                        optionElement.classList.add('incorrect');
+                    }
+                    // Desabilitar interação visual
+                    optionElement.style.pointerEvents = 'none';
+                }
+
+                optionsContainer.appendChild(optionElement);
+            });
+
+            updateButtons();
+        }
+
+        function selectOption(index) {
+            // Só permite seleção se a questão não foi verificada
+            if (questionsVerified[currentQuestion]) return;
+
+            userAnswers[currentQuestion] = index;
+
+            // Remove previous selection
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Add selection to clicked option
+            document.querySelectorAll('.option')[index].classList.add('selected');
+
+            updateButtons();
+        }
+
+        function checkAnswer() {
+            if (userAnswers[currentQuestion] === null) {
+                alert('Por favor, selecione uma resposta antes de verificar.');
+                return;
+            }
+
+            // Marcar como verificada
+            questionsVerified[currentQuestion] = true;
+            showAnswerFeedback();
+            updateButtons();
+        }
+
+        function showAnswerFeedback() {
+            const question = shuffledQuestions[currentQuestion];
+            const userAnswer = userAnswers[currentQuestion];
+            const correctAnswer = question.correct;
+
+            document.querySelectorAll('.option').forEach((option, index) => {
+                if (index === correctAnswer) {
+                    option.classList.add('correct');
+                } else if (index === userAnswer && index !== correctAnswer) {
+                    option.classList.add('incorrect');
+                }
+                // Desabilitar interação
+                option.style.pointerEvents = 'none';
+            });
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < shuffledQuestions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+                updateProgress();
+                updateButtons();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+                updateProgress();
+                updateButtons();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / shuffledQuestions.length) * 100;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+            document.getElementById('progress-text').textContent =
+                `Questão ${currentQuestion + 1} de ${shuffledQuestions.length}`;
+        }
+
+        function updateButtons() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const finishBtn = document.getElementById('finish-btn');
+            const checkBtn = document.getElementById('check-btn');
+            const isVerified = questionsVerified[currentQuestion];
+
+            prevBtn.disabled = currentQuestion === 0;
+
+            // Mostrar/esconder botão de verificar
+            if (isVerified) {
+                checkBtn.style.display = 'none';
+            } else {
+                checkBtn.style.display = 'inline-block';
+                checkBtn.disabled = userAnswers[currentQuestion] === null;
+            }
+
+            if (currentQuestion === shuffledQuestions.length - 1) {
+                nextBtn.classList.add('hidden');
+                finishBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                finishBtn.classList.add('hidden');
+            }
+        }
+
+        function finishQuiz() {
+            quizFinished = true;
+
+            // Mostrar botão para refazer respostas antes de ver o resultado
+            const resetBtn = document.getElementById('reset-btn');
+            const finishBtn = document.getElementById('finish-btn');
+
+            resetBtn.classList.remove('hidden');
+            finishBtn.textContent = 'Ver Resultado Final';
+            finishBtn.onclick = showResults;
+        }
+
+        function resetAnswers() {
+            if (confirm('Tem certeza que deseja refazer todas as respostas? Isso apagará todas as respostas verificadas.')) {
+                // Resetar todas as respostas e verificações
+                userAnswers = new Array(shuffledQuestions.length).fill(null);
+                questionsVerified = new Array(shuffledQuestions.length).fill(false);
+                quizFinished = false;
+
+                // Esconder botão de reset
+                document.getElementById('reset-btn').classList.add('hidden');
+                document.getElementById('finish-btn').textContent = 'Finalizar Quiz';
+                document.getElementById('finish-btn').onclick = finishQuiz;
+
+                // Recarregar questão atual
+                showQuestion();
+            }
+        }
+
+        function showResults() {
+            let correctAnswers = 0;
+
+            for (let i = 0; i < shuffledQuestions.length; i++) {
+                if (userAnswers[i] === shuffledQuestions[i].correct) {
+                    correctAnswers++;
+                }
+            }
+
+            const percentage = Math.round((correctAnswers / shuffledQuestions.length) * 100);
+
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('result-container').classList.remove('hidden');
+
+            document.getElementById('score').textContent = `${correctAnswers}/${shuffledQuestions.length}`;
+            document.getElementById('score-text').textContent =
+                `Você acertou ${percentage}% das questões!`;
+        }
+
+        function restartQuiz() {
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('result-container').classList.add('hidden');
+            initializeQuiz();
+        }
+
+        // Initialize quiz when page loads
+        window.onload = function () {
+            initializeQuiz();
+        };
+    </script>
+</body>
+
+</html>
